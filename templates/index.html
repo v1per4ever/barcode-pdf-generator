@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор PDF Штрих-кодов</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Генератор PDF Штрих-кодов</h1>
+            <p>Загрузите файл <code>Товары.csv</code>, чтобы сгенерировать штрих-коды формата 58x40мм для маркетплейсов.</p>
+        </header>
+        
+        <main>
+            <div class="upload-section">
+                <input type="file" id="csvFileInput" accept=".csv" class="file-input" />
+                <label for="csvFileInput" class="file-label">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Выбрать CSV файл</span>
+                </label>
+                <div id="fileName" class="file-name">Файл не выбран</div>
+            </div>
+
+            <div id="errorBox" class="error-box hidden"></div>
+
+            <div id="previewSection" class="preview-section hidden">
+                <h2>Предпросмотр данных (первые 10 строк)</h2>
+                <div class="table-container">
+                    <table id="previewTable">
+                        <thead>
+                            <tr>
+                                <th>Артикул продавца</th>
+                                <th>Артикул WB</th>
+                                <th>Баркод</th>
+                                <th>Наименование</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Данные вставляются через JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="action-section">
+                    <button id="generateBtn" class="primary-btn">
+                        Сгенерировать и Скачать ZIP
+                    </button>
+                    <div id="loadingIndicator" class="loading hidden">
+                        <div class="spinner"></div>
+                        <span>Генерация файлов...</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('csvFileInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const errorBox = document.getElementById('errorBox');
+        const previewSection = document.getElementById('previewSection');
+        const previewTableBody = document.querySelector('#previewTable tbody');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        
+        let uploadedFilepath = null;
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            fileNameDisplay.textContent = file.name;
+            errorBox.classList.add('hidden');
+            previewSection.classList.add('hidden');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Ошибка загрузки');
+                }
+                
+                uploadedFilepath = data.filepath;
+                renderPreview(data.preview);
+                previewSection.classList.remove('hidden');
+                
+            } catch (err) {
+                showError(err.message);
+            }
+        });
+
+        function renderPreview(rows) {
+            previewTableBody.innerHTML = '';
+            if (!rows || rows.length === 0) {
+                previewTableBody.innerHTML = '<tr><td colspan="4">Нет данных или неверный формат CSV (требуются колонки: "Артикул продавца", "Артикул WB", "Баркоды", "Наименование")</td></tr>';
+                return;
+            }
+            
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${escapeHtml(row['Артикул продавца'] || '')}</td>
+                    <td>${escapeHtml(row['Артикул WB'] || '')}</td>
+                    <td>${escapeHtml(row['Баркоды'] || '')}</td>
+                    <td>${escapeHtml(row['Наименование'] || '')}</td>
+                `;
+                previewTableBody.appendChild(tr);
+            });
+        }
+
+        generateBtn.addEventListener('click', async () => {
+            if (!uploadedFilepath) return;
+            
+            generateBtn.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+            errorBox.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ filepath: uploadedFilepath })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Ошибка при генерации');
+                }
+                
+                // Перенаправляем на скачивание
+                window.location.href = data.download_url;
+                
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                generateBtn.disabled = false;
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.classList.remove('hidden');
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
