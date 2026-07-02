@@ -2,43 +2,43 @@
   <img src="banner.jpg" alt="Barcode PDF Generator Banner" width="100%">
   
   <h1>📊 Barcode PDF Generator</h1>
-  <p><b>Утилита на Python для пакетной генерации штрихкодов и их компиляции в готовые к печати PDF-файлы.</b></p>
+  <p><b>Python utility for generating batches of barcodes and compiling them into print-ready PDF files.</b></p>
   
   <p>
-    <a href="#описание">Описание</a> •
-    <a href="#требования-к-данным">Требования к данным</a> •
-    <a href="#установка-и-запуск">Установка и запуск</a>
+    <a href="#description">Description</a> •
+    <a href="#data-requirements">Data Requirements</a> •
+    <a href="#installation-and-launch">Installation & Launch</a>
   </p>
 </div>
 
 ---
 
-## 📝 Описание
-**Barcode PDF Generator** — это мощная утилита с современным веб-интерфейсом для массовой генерации PDF-файлов со штрих-кодами (формат Code128) из CSV-таблицы. Отлично подходит для подготовки этикеток для маркетплейсов. 
-Формат генерируемых штрих-кодов по умолчанию настроен на **58x40 мм** (стандартный размер термоэтикетки).
+## 📝 Description
+**Barcode PDF Generator** is a powerful utility with a modern web interface designed for the mass generation of barcode PDF files (Code128 format) from a CSV table. It's perfectly suited for preparing labels for marketplaces. 
+The default barcode size is set to **58x40 mm** (standard thermal label size).
 
-### Ключевые возможности:
-- 📄 Чтение CSV файлов в различных кодировках (включая `utf-8`, `cp1251`).
-- 👁 Веб-интерфейс для предпросмотра данных перед началом генерации.
-- 📦 Пакетное скачивание всех сгенерированных штрих-кодов в одном удобном ZIP-архиве.
-- 🤖 Включает CLI-версию для интеграции и автоматизации.
+### Key Features:
+- 📄 Reads CSV files in various encodings (including `utf-8`, `cp1251`).
+- 👁 Web interface for previewing data before generating the PDFs.
+- 📦 Batch download of all generated barcodes in a single, convenient ZIP archive.
+- 🤖 Includes a CLI version for integration and automation.
 
-## 📋 Требования к данным
-Ваш CSV файл должен содержать следующие колонки:
-- **Артикул продавца** (используется как имя конечного файла)
-- **Баркоды** (цифры штрих-кода)
-- **Наименование** (название товара, которое будет напечатано на этикетке)
-- *Опционально:* **Артикул WB** 
+## 📋 Data Requirements
+Your CSV file must contain the following columns:
+- **Seller SKU** (Артикул продавца) - used as the final file name
+- **Barcodes** (Баркоды) - the barcode digits
+- **Product Name** (Наименование) - the name of the product printed on the label
+- *Optional:* **WB SKU** (Артикул WB)
 
-## 🚀 Установка и запуск
-1. Убедитесь, что у вас установлен Python (версии 3.8+).
-2. Склонируйте репозиторий:
+## 🚀 Installation and Launch
+1. Ensure you have Python installed (version 3.8+).
+2. Clone the repository:
    ```bash
    git clone https://github.com/v1per4ever/barcode-pdf-generator.git
    cd barcode-pdf-generator
    ```
-3. Установите необходимые зависимости:
+3. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-4. Запустите приложение (web или cli) в зависимости от ваших нужд, следуя внутренним инструкциям.
+4. Run the application (web or cli) depending on your needs, following the internal instructions.
